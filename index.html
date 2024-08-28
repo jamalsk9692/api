@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Voter Authentication</title>
+</head>
+<body>
+
+    <?php
+    if (isset($_GET['mobile']) && isset($_GET['password'])) {
+        $mobile = htmlspecialchars($_GET['mobile']);
+        $password = htmlspecialchars($_GET['password']);
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => 'https://gateway.eci.gov.in/api/v1/authn-voter/password-flow',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => json_encode([
+                'applicationName' => 'VHA',
+                'otp' => '',
+                'password' => $password,
+                'roleCode' => '*',
+                'username' => $mobile,
+            ]),
+            CURLOPT_HTTPHEADER => [
+                'User-Agent: okhttp/3.14.7',
+                'Connection: Keep-Alive',
+                'Accept: application/json',
+                'Content-Type: application/json',
+                'channelidobo: VHA',
+            ],
+        ]);
+
+        $response = curl_exec($curl);
+        curl_close($curl);
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => 'https://gateway.eci.gov.in/api/v1/authn-voter/otp-flow-send',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => json_encode([
+                'applicationName' => 'VHA',
+                'otp' => '',
+                'password' => '',
+                'roleCode' => '*',
+                'username' => $mobile,
+            ]),
+            CURLOPT_HTTPHEADER => [
+                'User-Agent: okhttp/3.14.7',
+                'Connection: Keep-Alive',
+                'Accept: application/json',
+                'Content-Type: application/json',
+                'channelidobo: VHA',
+            ],
+        ]);
+
+        $response1 = curl_exec($curl);
+        curl_close($curl);
+
+        echo '<h3>Response:</h3>';
+        echo '<pre>' . htmlspecialchars($response1) . '</pre>';
+    }
+    ?>
+</body>
+</html>
